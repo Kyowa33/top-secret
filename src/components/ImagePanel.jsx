@@ -63,7 +63,7 @@ const ImagePanel = ({ callback }) => {
                     alt="Preview"
                     title="Click to open an image"
                     onClick={() => document.getElementById('imageUpload').click()}
-                    style={{ maxWidth: '600px', maxHeight: '300px', borderRadius: '5px', display: "inline", cursor: "pointer" }}
+                    style={{ maxWidth: '300px', maxHeight: '150px', borderRadius: '5px', display: "inline", cursor: "pointer" }}
                   /><br/>
                   {lastFile && (
                     lastFile.name
