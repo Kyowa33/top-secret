@@ -7,6 +7,7 @@ const ImagePanel = ({ callback }) => {
   //const imageMimeType = /image\/(png|jpg|jpeg)/i;
 
   const imageMimeType = /image\/(png)/i;
+  const acceptMime = "image/png";
 
   function callParent(file) {
     if ((file !== undefined) && (file instanceof File)) {
@@ -49,7 +50,7 @@ const ImagePanel = ({ callback }) => {
                 <input
                   type="file"
                   id="imageUpload"
-                  accept="image/png, image/jpeg"
+                  accept={acceptMime}
                   style={{ display: 'none' }}
                   onChange={handleImageChange}
                 />
