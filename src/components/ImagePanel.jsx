@@ -4,7 +4,9 @@ import { FaFileImage } from 'react-icons/fa';
 const ImagePanel = ({ callback }) => {
   const [previewUrl, setPreviewUrl] = useState('');
   const [lastFile, setLastFile] = useState(null);
-  const imageMimeType = /image\/(png|jpg|jpeg)/i;
+  //const imageMimeType = /image\/(png|jpg|jpeg)/i;
+
+  const imageMimeType = /image\/(png)/i;
 
   function callParent(file) {
     if ((file !== undefined) && (file instanceof File)) {

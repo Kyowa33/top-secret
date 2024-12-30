@@ -73,7 +73,8 @@ function App() {
   }
 
   const onDecodeError = (err) => {
-    msg("No data found : items not updated (" + err + ").");
+    msg("No data found : items not updated.");
+    console.log("onDecodeError : " + err);
   }
 
   const onAfterDecode = () => {
@@ -115,7 +116,8 @@ function App() {
   }
 
   const onReadError = (err) => {
-    msg("Image could not be read (" + err + ").");
+    msg("Image could not be read.");
+    console.log("onReadError : " + err);
   }
 
   const tryRead = (file) => {
