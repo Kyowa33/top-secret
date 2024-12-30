@@ -2,7 +2,6 @@ import React, { useState } from 'react';
 import { FaKey } from 'react-icons/fa';
 import Credentials from '../model/Credentials.ts';
 import { Password } from 'primereact/password';
-import { SelectButton } from 'primereact/selectbutton';
 
 const PassPanel = ({ callback, initialCredentials }) => {
   const [selectedAlgo, setSelectedAlgo] = useState(initialCredentials.hashAlgo || 'SHA-512');

@@ -74,9 +74,6 @@ class StateObject extends TaskState {
     }
 }
 
-enum CarrierManagerPNG_Error {
-    CTX_NULL = "CTX_NULL",
-}
 
 class CarrierManagerPNG extends CarrierManagerBase {
 
