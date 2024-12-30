@@ -146,7 +146,7 @@ class CarrierManagerPNG extends CarrierManagerBase {
 
         reader.onload = () => {
             let img = UPNG.decode(reader.result);
-            this.imageData = { data: UPNG.toRGBA8(img), width: img.width, height: img.height, colorSpace: 'srgb' };
+            this.imageData = { data: new Uint8ClampedArray(UPNG.toRGBA8(img)), width: img.width, height: img.height, colorSpace: 'srgb' };
             this.fileRead = true;
             this.stop();
             incObj.onSuccess();
