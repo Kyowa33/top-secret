@@ -31,6 +31,23 @@ html.dark .App-header {
   color: white;
 }
 
+.flex {
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  justify-content: center;
+  padding:10px;
+}
+
+
+.flexv {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding:10px;
+}
+
 html textarea {
   background-color: white;
   color: black;

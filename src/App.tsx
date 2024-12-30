@@ -44,10 +44,23 @@ function App() {
     // keep new items
     let newListItems = listItems.filter((item) => (item.flagNew));
 
+    let lstPass = [credentials.getPassMaster()];
+    for (let item of listItems) {
+      lstPass.push(item.pass);
+    }
+
     // add decoded items
     for (const blk of data.getDataBlocks()) {
-      await blk.tryDecode("");
+      let passOk = "";
+      for (let pass of lstPass) {
+        await blk.tryDecode(pass);
+        if (blk.isDecoded()) {
+          passOk = pass;
+          break;
+        }
+      }
       let newItem = DataConv.fromBlockData(blk);
+      newItem.pass = passOk;
       newListItems.push(newItem);
     }
 
@@ -154,8 +167,11 @@ function App() {
 
 
   const tryDecodeItem = async (item: ItemData) => {
+    if (item.isDecoded()) {
+      return;
+    }
     let newPass = item.pass;
-    for (let i=0; i < listItems.length; i++) {
+    for (let i = 0; i < listItems.length; i++) {
       let itm = listItems[i];
       if (itm.uid === item.uid) {
         itm.pass = newPass;
@@ -232,11 +248,11 @@ function App() {
 
 
   const startEncode = async () => {
-    
+
     if (carrierManager === undefined) {
       return;
     }
-    
+
     let dc = new DataContainer();
 
     if (listItems !== undefined) {

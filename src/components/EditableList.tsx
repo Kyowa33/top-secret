@@ -162,6 +162,16 @@ const EditableList = ({ listUpdate, list, onTryDecodeItem }) => {
     }
   };
 
+  const getItemName = (item) => {
+    let s = item.name;
+
+    if (s.length > 10) {
+      return s.substring(0, 10) + "...";
+    }
+
+    return s;
+  }
+
   const getItemLabel = (item) => {
     let displaySize = !item.isDecoded() || !item.isText();
     let hasContent = item.isContentEditable();
@@ -198,7 +208,7 @@ const EditableList = ({ listUpdate, list, onTryDecodeItem }) => {
     const item = items[index];
     item.pass = value;
 
-    if (!item.hasDecodedData()) {
+    if ((!item.hasDecodedData()) && (!item.flagNew)) {
       await onTryDecodeItem(item);
     } else {
       const newItems = [...items];
@@ -215,87 +225,87 @@ const EditableList = ({ listUpdate, list, onTryDecodeItem }) => {
       <button onClick={handleAddItem} style={{ marginBottom: '10px' }} title="Add new item">
         <FaPlusCircle />
       </button>
-      <table style={{ border: 'none', padding: 0, width: '100%' }}>
-        <tbody>
-          {items.map((item, index) => (
-            <tr key={index} style={{ width: '100%', alignItems: 'center', marginBottom: '10px' }} className={(item.flagDelete === true) ? 'trTrash' : 'trNorm'}>
-              <td className={item.flagNew ? 'itemNew' : 'itemExisting'} style={{ flex: 1, marginRight: '10px' }}>
-                <FaStar title={item.flagNew ? "New item" : "Existing item"} />
-              </td>
-              <td className={!item.isDecoded() ? 'itemEncrypted' : 'itemDecrypted'} style={{ flex: 1, marginRight: '10px' }}>
-                {(!item.isDecoded()) ? <FaLock title="Encrypted" /> : <FaLockOpen title="Decrypted" />}
-              </td>
-              <td >
-                {(editableIndex === index) && (item.isDecoded()) ? (
-                  <input
-                    type="text"
-                    value={item.name}
-                    onChange={(e) => handleNameChange(index, e.target.value)}
-                    onBlur={handleNameBlur}
-                    autoFocus
-                  />
-                ) : (item.isDecoded()) ? (
-                  <span
-                    onClick={() => handleNameClick(index)}
-                    style={{ cursor: 'pointer', textDecoration: 'underline', verticalAlign: 'middle' }}
-                  >
-                    {item.name}
-                  </span>
-                ) : (
-                  <span
-                    className='encryptedName'
-                  >
-                    Encrypted
-                  </span>
-                )
-                }
-              </td>
-              <td style={{ color: 'grey' }}>
-                {getItemLabel(item)}
-              </td>
-              <td style={{ alignContent: 'center' }}>
-                <div>
-                  <div style={{ display: 'inline-flex', gap: '10px', verticalAlign: 'middle' }}>
-                    <button style={{ cursor: 'pointer' }} disabled={!item.isDecoded()}
-                      onClick={() => document.getElementById("itemUpload" + index)?.click()}
-                      title="Attach file">
-                      <FaUpload />
-                      <input id={"itemUpload" + index}
-                        type="file"
-                        style={{ display: 'none' }}
-                        onChange={(event) => handleUpload(index, event)}
-                      />
-                    </button>
-                    <button onClick={() => handleDownload(item)} title="Download" disabled={!item.hasDecodedData()}>
-                      <FaDownload />
-                    </button>
-                    <button onClick={() => handlePreview(item)} title="Preview" disabled={!item.isPreviewable()}>
-                      <FaEye />
-                    </button>
+      <div className='flexv' style={{ width: '100%' }}>
+        {items.map((item, index) => (
+          <div key={index} style={{ width: '100%', alignItems: 'center', marginBottom: '10px', flexWrap: 'wrap' }} className={(item.flagDelete === true) ? 'flex trTrash' : 'flex trNorm'}>
+            <div className={item.flagNew ? 'itemNew' : 'itemExisting'} style={{ flex: 1, marginRight: '10px' }}>
+              <FaStar title={item.flagNew ? "New item" : "Existing item"} />
+            </div>
+            <div className={!item.isDecoded() ? 'itemEncrypted' : 'itemDecrypted'} style={{ flex: 1, marginRight: '10px' }}>
+              {(!item.isDecoded()) ? <FaLock title="Encrypted" /> : <FaLockOpen title="Decrypted" />}
+            </div>
+            <div style={{ flex: '5 0 auto', marginRight: '10px' }}>
+              {(editableIndex === index) && (item.isDecoded()) ? (
+                <input
+                  type="text"
+                  value={item.name}
+                  onChange={(e) => handleNameChange(index, e.target.value)}
+                  onBlur={handleNameBlur}
+                  autoFocus
+                />
+              ) : (item.isDecoded()) ? (
+                <span
+                  onClick={() => handleNameClick(index)}
+                  style={{ cursor: 'pointer', textDecoration: 'underline', verticalAlign: 'middle' }}
+                  title={item.name}
+                >
+                  {getItemName(item)}
+                </span>
+              ) : (
+                <span
+                  className='encryptedName'
+                >
+                  Encrypted
+                </span>
+              )
+              }
+            </div>
+            <div style={{ flex: '5 0 auto', color: 'grey' }}>
+              {getItemLabel(item)}
+            </div>
 
-                    <button onClick={() => handleEditContent(index)} title="Edit Content" disabled={!item.isContentEditable()}>
-                      <FaEdit />
-                    </button>
-                    <div style={{}}>
-                      <Password value={item.pass} onChange={(e) => handlePassChange(index, e.target.value)} toggleMask feedback={false} />
-                    </div>
-                    {item.flagDelete ? (
-                      <button onClick={() => handleDeleteItem(index)} title="Restore">
-                        <FaTrashRestore />
-                      </button>
-                    ) : (
-                      <button onClick={() => handleDeleteItem(index)} title="Put in trash">
-                        <FaTrash />
-                      </button>
-                    )
-                    }
-                  </div>
-                </div>
-              </td>
-            </tr>
-          ))}
-        </tbody>
-      </table>
+
+            <div style={{ display: 'inline-flex', gap: '10px', verticalAlign: 'middle' }}>
+              <button style={{ cursor: 'pointer' }} disabled={!item.isDecoded()}
+                onClick={() => document.getElementById("itemUpload" + index)?.click()}
+                title="Attach file">
+                <FaUpload />
+                <input id={"itemUpload" + index}
+                  type="file"
+                  style={{ display: 'none' }}
+                  onChange={(event) => handleUpload(index, event)}
+                />
+              </button>
+              <button onClick={() => handleDownload(item)} title="Download" disabled={!item.hasDecodedData()}>
+                <FaDownload />
+              </button>
+              <button onClick={() => handlePreview(item)} title="Preview" disabled={!item.isPreviewable()}>
+                <FaEye />
+              </button>
+
+              <button onClick={() => handleEditContent(index)} title="Edit Content" disabled={!item.isContentEditable()}>
+                <FaEdit />
+              </button>
+
+              {item.flagDelete ? (
+                <button onClick={() => handleDeleteItem(index)} title="Restore">
+                  <FaTrashRestore />
+                </button>
+              ) : (
+                <button onClick={() => handleDeleteItem(index)} title="Put in trash">
+                  <FaTrash />
+                </button>
+              )
+              }
+            </div>
+            <div style={{ flex: '1 0 auto' }}>
+              <Password value={item.pass} onChange={(e) => handlePassChange(index, e.target.value)} toggleMask feedback={false} />
+            </div>
+
+          </div>
+
+        ))}
+      </div>
 
       {editingContentIndex !== null && (
         <div style={{ marginBottom: '15px' }}>

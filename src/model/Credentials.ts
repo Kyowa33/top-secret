@@ -3,7 +3,7 @@ import sha256 from 'crypto-js/sha256';
 import Binary from '../util/Binary.ts';
 
 interface hashFct {
-    (input : String) : any;
+    (input : string) : any;
 }
 
 class HashAlgo {
@@ -13,15 +13,15 @@ class HashAlgo {
         new HashAlgo("SHA-256", sha256)
     ];
 
-    private code: String;
+    private code: string;
     private fct: hashFct;
 
-    constructor(code: String, fct: hashFct) {
+    constructor(code: string, fct: hashFct) {
         this.code = code;
         this.fct = fct;
     }
 
-    public getCode(): String {
+    public getCode(): string {
         return this.code;
     }
 
@@ -29,7 +29,7 @@ class HashAlgo {
         return this.fct;
     }
 
-    public static fromCode(code:String) : HashAlgo | undefined {
+    public static fromCode(code:string) : HashAlgo | undefined {
         return this.tabHashAlgos.find((item) => item.getCode() === code);
     }
 }
@@ -38,32 +38,32 @@ class Credentials {
 
     
 
-    private hashAlgo: String;
-    private passMaster: String;
+    private hashAlgo: string;
+    private passMaster: string;
 
     private hash: number[];
     private hashValid: boolean;
 
-    constructor(hashAlgo?: String, passMaster?: String) {
+    constructor(hashAlgo?: string, passMaster?: string) {
         this.hashAlgo = hashAlgo || HashAlgo.tabHashAlgos[0].getCode();
         this.passMaster = passMaster || "";
         this.hashValid = false;
     }
 
-    public getHashAlgo(): String {
+    public getHashAlgo(): string {
         return this.hashAlgo;
     }
 
-    public getPassMaster(): String {
+    public getPassMaster(): string {
         return this.passMaster;
     }
 
-    public setHashAlgo(newHash: String) {
+    public setHashAlgo(newHash: string) {
         this.hashAlgo = newHash;
         this.hashValid = false;
     }
 
-    public setPassMaster(newPass: String) {
+    public setPassMaster(newPass: string) {
         this.passMaster = newPass;
         this.hashValid = false;
     }
@@ -86,7 +86,7 @@ class Credentials {
         return this.hash;
     }
 
-    public toString(): String {
+    public toString(): string {
         return "hash algo : " + this.hashAlgo + " ; pass : " + this.passMaster;
     }
 

@@ -29,26 +29,20 @@ const PassPanel = ({ callback, initialCredentials }) => {
   };
 
   return (
-    <div className='card linePanel'>
-      <table align='center'>
-        <tbody>
-          <tr>
-            <td>
-              <FaKey />
-            </td>
-            <td>
-              <select id="hashAlgo" value={selectedAlgo} onChange={handleSelectChange}>
-                <option value="SHA-256">SHA-256</option>
-                <option value="SHA-512">SHA-512</option>
-              </select>
-            </td>
-            <td>
-              <Password inputId="passMaster" value={passMaster} onChange={handlePassMasterChange}
-                toggleMask feedback="false" />
-            </td>
-          </tr>
-        </tbody>
-      </table>
+    <div className='card linePanel flex' style={{flexWrap:'wrap'}}>
+      <div className='flex'>
+        <FaKey />
+      </div>
+      <div className='flex'>
+        <select id="hashAlgo" value={selectedAlgo} onChange={handleSelectChange}>
+          <option value="SHA-256">SHA-256</option>
+          <option value="SHA-512">SHA-512</option>
+        </select>
+      </div>
+      <div className='flex'>
+        <Password inputId="passMaster" value={passMaster} onChange={handlePassMasterChange}
+          toggleMask feedback={false} />
+      </div>
     </div>
   );
 };
