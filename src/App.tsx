@@ -12,6 +12,7 @@ import { DataContainer } from './model/data/DataContainer.ts';
 import ItemData from './model/component/ItemData.ts';
 import { CarrierManagerBase } from './service/CarrierManagerBase.ts';
 import DataConv from './service/DataConv.ts';
+import UiUtils from './util/UiUtils.ts';
 
 
 let carrierManager: CarrierManagerBase | undefined;
@@ -24,12 +25,58 @@ function App() {
   const [progress, setProgress] = useState(0);
   const [progressVisible, setProgressVisible] = useState(false);
   const [listItems, setListItems] = useState<ItemData[]>([]);
+  const [storRateCap, setStorRateCap] = useState<number>(0.5);
+  const [storTotalCap, setStorTotalCap] = useState<number>(0);
+  const [storUsedCap, setStorUsedCap] = useState<number>(0);
+
 
   let cbReplaceItems: CallableFunction; // To send listItems into EditableList
+  let imgStorageCapacities: number[] = [0];
+
+
+  const computeStorRateCap = (used: number, total: number) => {
+    if (total === 0) {
+      console.log("setStorRateCap 0");
+      setStorRateCap(0);
+    } else {
+      console.log("setStorRateCap " + (used / total));
+      setStorRateCap(used / total);
+    }
+  }
+
 
   const cbListUpdate = (lst: ItemData[], _cbReplaceItems: CallableFunction) => {
     cbReplaceItems = _cbReplaceItems;
-    setListItems(lst); // Receive listItems from EditableList
+
+    setTimeout(() => {
+      setListItems(lst); // Receive listItems from EditableList
+
+      let usedCap = 6 + 4 + 32 + 4; // DataContainer header + Hash + Stop blocks
+      // update used capacity
+      for (let item of lst) {
+        let itemCap = 0;
+        if (!item.flagDelete) {
+          itemCap += 4; // Block head
+          if (item.hasEncodedData()) {
+            itemCap = item.encodedData?.length || 0;
+          } else {
+            let tmpItemCap = 4; // block data header
+            tmpItemCap += 1 + item.name.length;
+            tmpItemCap += 1 + item.contentType.length;
+            tmpItemCap += item.decodedData?.length || 0;
+            tmpItemCap += 15;
+            tmpItemCap &= 0xFFFFFFF0; // 16-bytes AES padding
+            itemCap += tmpItemCap;
+          }
+        }
+        usedCap += itemCap;
+      }
+  
+      setStorUsedCap(usedCap);
+      computeStorRateCap(usedCap, storTotalCap);
+      
+    }, 100);
+
   }
 
 
@@ -92,7 +139,7 @@ function App() {
 
     let creds = newCred || credentials;
 
-    console.log("tryDecode " + creds.getPassMaster());
+    //console.log("tryDecode " + creds.getPassMaster());
     carrierManager.stop();
     carrierManager = carrierManager.newInstance();
 
@@ -110,15 +157,32 @@ function App() {
     );
   }
 
+  const updateImageStorageCapacities = () => {
+    let imgStorageTotal = 0;
+    if (carrierManager !== undefined) {
+      imgStorageCapacities = carrierManager.getLayersCapacity();
+      for (let layerCapacity of imgStorageCapacities) {
+        imgStorageTotal += layerCapacity;
+      }
+    } else {
+      imgStorageCapacities = [];
+    }
+
+    setStorTotalCap(imgStorageTotal);
+    computeStorRateCap(storUsedCap, imgStorageTotal);
+  }
+
 
   const onReadSuccess = () => {
     msg("Image read.");
+    updateImageStorageCapacities();
     tryDecode();
   }
 
   const onReadError = (err) => {
     msg("Image could not be read.");
     console.log("onReadError : " + err);
+    setProgressVisible(false);
   }
 
   const tryRead = (file) => {
@@ -223,6 +287,8 @@ function App() {
       return;
     }
 
+    setProgressVisible(true);
+
     carrierManager.stop();
     carrierManager = carrierManager.newInstance();
 
@@ -247,6 +313,7 @@ function App() {
 
   const onEncodeError = (err) => {
     msg("Encoding error (" + err + ").");
+    setProgressVisible(false);
   }
 
 
@@ -255,6 +322,9 @@ function App() {
     if (carrierManager === undefined) {
       return;
     }
+
+    msg("Encoding items...");
+    setProgressVisible(true);
 
     let dc = new DataContainer();
 
@@ -298,6 +368,22 @@ function App() {
     startEncode();
   }
 
+  const getStorColor = () => {
+    let storCol = "#3B82F6"; // Default blue color
+    if (storTotalCap > 0) {
+      let rate = storUsedCap / storTotalCap;
+      storCol = "#2AD02A"; // Green
+      if (rate > 0.25) {
+        storCol = "#FFC02A"; // Orange
+      }
+      if (rate > 0.5) {
+        storCol = "#D08080"; // Red
+      }
+    }
+    return storCol;
+  }
+
+
   return (
     <div className="App">
       <header className="App-header">
@@ -316,9 +402,12 @@ function App() {
             <EditableList listUpdate={cbListUpdate} list={listItems} onTryDecodeItem={tryDecodeItem} />
           </div>
           <div>
-            {//credentials !== null && Binary.arrayUint8ToHex(credentials.getHash())
-              //listItems.length
-            }
+            {(storTotalCap > 0) && (
+              <div style={{ marginBottom: "10px" }}>
+                <span>{UiUtils.formatFileSize(storUsedCap)} / {UiUtils.formatFileSize(storTotalCap)}</span>
+                <ProgressBar value={storRateCap} showValue={false} color={getStorColor()}></ProgressBar>
+              </div>
+            )}
           </div>
           <div className='card linePanel'>
             <table align='center'>
@@ -326,9 +415,7 @@ function App() {
                 <tr>
                   <td>
                     <button onClick={handleExport} disabled={!isCarrier()}>
-
                       <i className={isCarrier() ? "pi pi-spin pi-cog" : "pi pi-cog"} style={{ fontSize: '2rem' }}></i>
-
                     </button>
                   </td>
                   <td>
