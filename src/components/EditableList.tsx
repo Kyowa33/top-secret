@@ -156,7 +156,7 @@ const EditableList = ({ listUpdate, list, onTryDecodeItem }) => {
     if (size < 1024) {
       return `${size}\xA0bytes`;
     } else if (size < 1024 * 1024) {
-      return `${(size / 1024).toFixed(2)}\xA0KB`;
+      return `${(size / 1024).toFixed(2)}\xA0kB`;
     } else {
       return `${(size / (1024 * 1024)).toFixed(2)}\xA0MB`;
     }
@@ -165,8 +165,8 @@ const EditableList = ({ listUpdate, list, onTryDecodeItem }) => {
   const getItemName = (item) => {
     let s = item.name;
 
-    if (s.length > 10) {
-      return s.substring(0, 10) + "...";
+    if (s.length > 20) {
+      return s.substring(0, 20) + "...";
     }
 
     return s;
