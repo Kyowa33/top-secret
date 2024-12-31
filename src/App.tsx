@@ -44,9 +44,10 @@ function App() {
     // keep new items
     let newListItems = listItems.filter((item) => (item.flagNew));
 
-    let lstPass = [credentials.getPassMaster()];
+    let lstPass = [credentials.getPassMaster()]; // will try with master pass
+    lstPass.push(""); // will try with empty pass
     for (let item of listItems) {
-      lstPass.push(item.pass);
+      lstPass.push(item.pass); // will try with every single file pass
     }
 
     // add decoded items
