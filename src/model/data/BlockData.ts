@@ -153,10 +153,10 @@ class BlockData extends BlockBase {
             decryptedBuf = await this.decryptData(this.blockDataRaw, key, iv);
         }
         catch(error) {
-            console.log("BlockData : Wrong pass : " + pass);
+            // console.log("BlockData : Wrong pass : " + pass);
             return;
         }
-        console.log("BlockData : Correct pass : " + pass);
+        // console.log("BlockData : Correct pass : " + pass);
         let inBuf = new Uint8Array(decryptedBuf);
 
         this.encodedDataSync = false;
