@@ -36,11 +36,9 @@ function App() {
 
   const computeStorRateCap = (used: number, total: number) => {
     if (total === 0) {
-      console.log("setStorRateCap 0");
       setStorRateCap(0);
     } else {
-      console.log("setStorRateCap " + (used / total));
-      setStorRateCap(used / total);
+      setStorRateCap((used / total) * 100);
     }
   }
 
@@ -71,10 +69,10 @@ function App() {
         }
         usedCap += itemCap;
       }
-  
+
       setStorUsedCap(usedCap);
       computeStorRateCap(usedCap, storTotalCap);
-      
+
     }, 100);
 
   }
@@ -360,23 +358,45 @@ function App() {
   }
 
 
+  const canExport = () => {
+    return (isCarrier() && (storUsedCap < storTotalCap));
+  }
+
+
   const handleExport = () => {
-    if ((carrierManager === undefined) || (!carrierManager.isFileRead())) {
+    if (!canExport()) {
       return;
     }
 
     startEncode();
   }
 
+
+  const getStorLabel = () => {
+    let rate = "";
+    if (storTotalCap > 0) {
+      rate = UiUtils.formatFileSize(storUsedCap) + " / " + UiUtils.formatFileSize(storTotalCap);
+      if (storUsedCap >= storTotalCap) {
+        rate += " ⚠️⚠️⚠️ Not enough space !";
+      } else
+        if (storRateCap > 67) {
+          rate += " ⚠️⚠️ Strong visual alteration"
+        }else
+        if (storRateCap > 33) {
+          rate += " ⚠️ Visual alteration"
+        }
+    }
+    return rate;
+  }
+
   const getStorColor = () => {
     let storCol = "#3B82F6"; // Default blue color
     if (storTotalCap > 0) {
-      let rate = storUsedCap / storTotalCap;
       storCol = "#2AD02A"; // Green
-      if (rate > 0.25) {
+      if (storRateCap > 33) {
         storCol = "#FFC02A"; // Orange
       }
-      if (rate > 0.5) {
+      if (storRateCap > 67) {
         storCol = "#D08080"; // Red
       }
     }
@@ -402,24 +422,22 @@ function App() {
             <EditableList listUpdate={cbListUpdate} list={listItems} onTryDecodeItem={tryDecodeItem} />
           </div>
           <div>
-            {(storTotalCap > 0) && (
-              <div style={{ marginBottom: "10px" }}>
-                <span>{UiUtils.formatFileSize(storUsedCap)} / {UiUtils.formatFileSize(storTotalCap)}</span>
-                <ProgressBar value={storRateCap} showValue={false} color={getStorColor()}></ProgressBar>
-              </div>
-            )}
+            <div style={{ marginBottom: "10px" }}>
+              <span>{getStorLabel()}</span>
+              <ProgressBar value={storRateCap} showValue={false} color={getStorColor()}></ProgressBar>
+            </div>
           </div>
           <div className='card linePanel'>
             <table align='center'>
               <tbody>
                 <tr>
                   <td>
-                    <button onClick={handleExport} disabled={!isCarrier()}>
-                      <i className={isCarrier() ? "pi pi-spin pi-cog" : "pi pi-cog"} style={{ fontSize: '2rem' }}></i>
+                    <button onClick={handleExport} disabled={!canExport()}>
+                      <i className={canExport() ? "pi pi-spin pi-cog" : "pi pi-cog"} style={{ fontSize: '2rem' }}></i>
                     </button>
                   </td>
                   <td>
-                    <button onClick={handleExport} disabled={!isCarrier()}>
+                    <button onClick={handleExport} disabled={!canExport()}>
                       Process & Download
                     </button>
                   </td>
