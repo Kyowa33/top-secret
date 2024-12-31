@@ -51,7 +51,7 @@ class StateObject extends TaskState {
         this.pos = h1 + (h2 << 8) + (h3 << 16);
         this.pos %= this.bitsOnLayer;
         this.bitMap = new Uint32Array(this.bitsOnLayer / 32); // 32-bits words for 1 layer
-        console.log("### resetPos: " + this.pos + " ; hashIndex : " + this.hashIndex);
+        // console.log("### resetPos: " + this.pos + " ; hashIndex : " + this.hashIndex);
     }
 
     public incPos(): boolean {
@@ -60,10 +60,10 @@ class StateObject extends TaskState {
         this.pos %= this.bitsOnLayer;
         this.pos = TabUtils.getNextFreePos(this.bitMap, this.pos);
 
-        //console.log("incPos: " + this.pos + " ; hashIndex : " + this.hashIndex);
+        // console.log("incPos: " + this.pos + " ; hashIndex : " + this.hashIndex);
 
         if (this.pos < 0) {
-            console.log("Layer " + this.bitLayer + " full");
+            // console.log("Layer " + this.bitLayer + " full");
             this.bitLayer <<= 1;
             if (this.bitLayer === 256) {
                 return false;
@@ -119,7 +119,7 @@ class CarrierManagerPNG extends CarrierManagerBase {
     public decode(creds: Credentials, onUpdate: CallableFunction, onSuccess: CallableFunction, onError: CallableFunction): void {
         if (Task.LOG) {
             let currentTimeStart = Date.now();
-            console.log("inst " + this.taskInstanceNumber + " ; call decode : " + currentTimeStart + " ; " + creds.getPassMaster());
+            console.log("inst " + this.taskInstanceNumber + " ; call decode : " + currentTimeStart);
         }
         this.stop();
         const newIncObj: StateObject = new StateObject(() => { this.runDecode() }, onUpdate, onSuccess, onError);
@@ -219,7 +219,7 @@ class CarrierManagerPNG extends CarrierManagerBase {
     public encode(creds: Credentials, data: DataContainer, onUpdate: CallableFunction, onSuccess: CallableFunction, onError: CallableFunction): void {
         if (Task.LOG) {
             let currentTimeStart = Date.now();
-            console.log("inst " + this.taskInstanceNumber + " ; call encode : " + currentTimeStart + " ; " + creds.getPassMaster());
+            console.log("inst " + this.taskInstanceNumber + " ; call encode : " + currentTimeStart);
         }
         this.stop();
         const newIncObj: StateObject = new StateObject(() => { this.runEncode() }, onUpdate, onSuccess, onError);
