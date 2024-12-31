@@ -41,7 +41,7 @@ class ItemData {
   }
 
   public isText(): boolean {
-    return this.contentType === 'text/plain';
+    return (this.contentType === 'text/plain') && (this.decodedData !== null);
   }
 
   public isContentEditable(): boolean {
