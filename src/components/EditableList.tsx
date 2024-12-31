@@ -220,7 +220,7 @@ const EditableList = ({ listUpdate, list, onTryDecodeItem }) => {
       </button>
       <div className='flexv' style={{ width: '100%' }}>
         {items.map((item, index) => (
-          <div key={index} style={{ width: '100%', alignItems: 'center', marginBottom: '10px', flexWrap: 'wrap' }} className={(item.flagDelete === true) ? 'flex trTrash' : 'flex trNorm'}>
+          <div key={index} style={{ width: '100%', alignItems: 'center', marginBottom: '10px', flexWrap: 'wrap', borderRadius:'10px' }} className={(item.flagDelete === true) ? 'flex trTrash' : 'flex trNorm'}>
             <div className={item.flagNew ? 'itemNew' : 'itemExisting'} style={{ flex: 1, marginRight: '10px', marginBottom: '10px' }}>
               <FaStar title={item.flagNew ? "New item" : "Existing item"} />
             </div>
