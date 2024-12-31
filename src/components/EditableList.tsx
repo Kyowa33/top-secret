@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import { FaUpload, FaDownload, FaEye, FaTrash, FaTrashRestore, FaCheck, FaLock, FaLockOpen, FaEdit, FaPlusCircle, FaTimes, FaStar } from 'react-icons/fa';
 import { Password } from 'primereact/password';
 import ItemData from '../model/component/ItemData.ts';
+import UiUtils from '../util/UiUtils.ts';
 
 let nbTrashItems = 0;
 
@@ -152,15 +153,6 @@ const EditableList = ({ listUpdate, list, onTryDecodeItem }) => {
     updateItems(items);
   };
 
-  const formatFileSize = (size) => {
-    if (size < 1024) {
-      return `${size}\xA0bytes`;
-    } else if (size < 1024 * 1024) {
-      return `${(size / 1024).toFixed(2)}\xA0kB`;
-    } else {
-      return `${(size / (1024 * 1024)).toFixed(2)}\xA0MB`;
-    }
-  };
 
   const getItemName = (item) => {
     let s = item.name;
@@ -172,6 +164,7 @@ const EditableList = ({ listUpdate, list, onTryDecodeItem }) => {
     return s;
   }
 
+  
   const getItemLabel = (item) => {
     let displaySize = !item.isDecoded() || !item.isText();
     let hasContent = item.isContentEditable();
@@ -187,7 +180,7 @@ const EditableList = ({ listUpdate, list, onTryDecodeItem }) => {
       if (item.hasDecodedData()) {
         size = item.decodedData.length || item.decodedData.size;
       }
-      return formatFileSize(size);
+      return UiUtils.formatFileSize(size);
     }
 
     if (item.decodedData === null) {
@@ -266,7 +259,7 @@ const EditableList = ({ listUpdate, list, onTryDecodeItem }) => {
 
 
             <div style={{ display: 'inline-flex', gap: '10px', verticalAlign: 'middle', marginRight: '10px', marginBottom: '10px' }}>
-              <button style={{ cursor: 'pointer' }} disabled={!item.isDecoded()}
+              <button disabled={!item.isDecoded()}
                 onClick={() => document.getElementById("itemUpload" + index)?.click()}
                 title="Attach file">
                 <FaUpload />
