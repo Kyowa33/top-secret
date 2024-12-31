@@ -79,7 +79,7 @@ class Credentials {
             let tabInt32 = hashAlgoItem.getFct()(this.getPassMaster()).words;
             this.hash = Binary.arrayInt32ToUint8(tabInt32);
 
-            console.log("hash : " + Binary.arrayUint8ToHex(this.hash));
+            // console.log("hash : " + Binary.arrayUint8ToHex(this.hash));
 
             this.hashValid = true;
         }
