@@ -228,13 +228,13 @@ const EditableList = ({ listUpdate, list, onTryDecodeItem }) => {
       <div className='flexv' style={{ width: '100%' }}>
         {items.map((item, index) => (
           <div key={index} style={{ width: '100%', alignItems: 'center', marginBottom: '10px', flexWrap: 'wrap' }} className={(item.flagDelete === true) ? 'flex trTrash' : 'flex trNorm'}>
-            <div className={item.flagNew ? 'itemNew' : 'itemExisting'} style={{ flex: 1, marginRight: '10px' }}>
+            <div className={item.flagNew ? 'itemNew' : 'itemExisting'} style={{ flex: 1, marginRight: '10px', marginBottom: '10px' }}>
               <FaStar title={item.flagNew ? "New item" : "Existing item"} />
             </div>
-            <div className={!item.isDecoded() ? 'itemEncrypted' : 'itemDecrypted'} style={{ flex: 1, marginRight: '10px' }}>
+            <div className={!item.isDecoded() ? 'itemEncrypted' : 'itemDecrypted'} style={{ flex: 1, marginRight: '10px', marginBottom: '10px' }}>
               {(!item.isDecoded()) ? <FaLock title="Encrypted" /> : <FaLockOpen title="Decrypted" />}
             </div>
-            <div style={{ flex: '5 0 auto', marginRight: '10px' }}>
+            <div style={{ flex: '5 0 auto', marginRight: '10px', marginBottom: '10px' }}>
               {(editableIndex === index) && (item.isDecoded()) ? (
                 <input
                   type="text"
@@ -260,12 +260,12 @@ const EditableList = ({ listUpdate, list, onTryDecodeItem }) => {
               )
               }
             </div>
-            <div style={{ flex: '5 0 auto', color: 'grey' }}>
+            <div style={{ flex: '5 0 auto', color: 'grey', marginRight: '10px', marginBottom: '10px' }}>
               {getItemLabel(item)}
             </div>
 
 
-            <div style={{ display: 'inline-flex', gap: '10px', verticalAlign: 'middle' }}>
+            <div style={{ display: 'inline-flex', gap: '10px', verticalAlign: 'middle', marginRight: '10px', marginBottom: '10px' }}>
               <button style={{ cursor: 'pointer' }} disabled={!item.isDecoded()}
                 onClick={() => document.getElementById("itemUpload" + index)?.click()}
                 title="Attach file">
