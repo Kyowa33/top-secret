@@ -270,16 +270,19 @@ class CarrierManagerPNG extends CarrierManagerBase {
             incObj.encodeStatus = StatusEncoder.PRINTING_DATA_CONTAINER;
             incObj.encodedOutBuffer = await incObj.data.printOut();
             // runEncode can be called again by the Task loop while data.printOut works.
-            incObj.encodeStatus = StatusEncoder.ENCODE_IMAGE;
             incObj.byteIndex = 0;
             incObj.curByte = incObj.encodedOutBuffer[incObj.byteIndex];
             incObj.curByteBitW = 1;
-            return true;
+            incObj.encodeStatus = StatusEncoder.ENCODE_IMAGE;
+            return false; // Break the Task loop
+        } else 
+        if (incObj.encodeStatus === StatusEncoder.PRINTING_DATA_CONTAINER) {
+            return true; // Break the Task loop
         } else 
         if (incObj.encodeStatus === StatusEncoder.ENCODE_IMAGE) {
             let runCount = 0;
 
-            // Parse 1kB
+            // Encode 1kB
             while (runCount < 8 * 1024) {
                 incObj.bitCounter++;
                 runCount++;
@@ -306,9 +309,21 @@ class CarrierManagerPNG extends CarrierManagerBase {
             }
         }
 
-        incObj.onUpdate(incObj.bitCounter * 100 / incObj.bitTotal);
+        incObj.onUpdate(incObj.byteIndex * 100 / incObj.encodedOutBuffer.length);
 
         return false;
+    }
+
+
+    public getLayersCapacity() : number[] {
+        let caps : number[] = [];
+
+        for (let bit = 0; bit < 8; bit++) {
+            let exploitableBytes = Math.floor((this.imageData.width * this.imageData.height * 4) / 8); // 1 bit on each ARGB channel
+            caps.push(exploitableBytes);
+        }
+
+        return caps;
     }
 
 }
