@@ -422,10 +422,12 @@ function App() {
             <EditableList listUpdate={cbListUpdate} list={listItems} onTryDecodeItem={tryDecodeItem} />
           </div>
           <div>
+            { (storTotalCap > 0) && (
             <div style={{ marginBottom: "10px" }}>
               <span>{getStorLabel()}</span>
               <ProgressBar value={storRateCap} showValue={false} color={getStorColor()}></ProgressBar>
             </div>
+            )}
           </div>
           <div className='card linePanel'>
             <table align='center'>
