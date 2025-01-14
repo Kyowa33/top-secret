@@ -26,7 +26,7 @@ class TabUtils {
         }
     }
 
-    public static getNextFreePos(arr: any, pos: number): number {
+    public static getNextFreePos(arr: any, pos: number, bits: number): number {
         
         let nextPos = pos;
 
@@ -46,16 +46,17 @@ class TabUtils {
             if ((bitW === 0) || (bitW === (1 << 32))) {
                 bitW = 1;
                 idx++;
-                if (idx >= arr.length) {
-                    if (wrapped) {
-                        return -1;
-                    }
-                    idx = 0;
-                    nextPos = 0;
-                    wrapped = true;
-                }
-                val = arr[idx];
             }
+            if (nextPos >= bits) {
+                if (wrapped) {
+                    return -1;
+                }
+                idx = 0;
+                bitW = 1;
+                nextPos = 0;
+                wrapped = true;
+            }
+            val = arr[idx];
         }
 
         arr[idx] |= bitW;

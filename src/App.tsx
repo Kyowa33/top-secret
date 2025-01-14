@@ -13,6 +13,7 @@ import ItemData from './model/component/ItemData.ts';
 import { CarrierManagerBase } from './service/CarrierManagerBase.ts';
 import DataConv from './service/DataConv.ts';
 import UiUtils from './util/UiUtils.ts';
+import Binary from './util/Binary.ts';
 
 
 let carrierManager: CarrierManagerBase | undefined;
@@ -85,6 +86,16 @@ function App() {
 
   const onDecodeSuccess = async (data: DataContainer) => {
     msg("Data found : items updated.");
+
+    // let datai8 = await data.printOut();
+    
+    // const blob = new Blob([datai8], { type: "application/octet-stream" });
+    //   const url = URL.createObjectURL(blob);
+    //   const link = document.createElement('a');
+    //   link.href = url;
+    //   link.download = "rawData.bin";
+    //   link.click();
+    //   URL.revokeObjectURL(url);
 
     // keep new items
     let newListItems = listItems.filter((item) => (item.flagNew));
@@ -337,6 +348,16 @@ function App() {
       }
     }
 
+    // let datai8 = await dc.printOut();
+    
+    // const blob = new Blob([datai8], { type: "application/octet-stream" });
+    //   const url = URL.createObjectURL(blob);
+    //   const link = document.createElement('a');
+    //   link.href = url;
+    //   link.download = "rawDataWrite.bin";
+    //   link.click();
+    //   URL.revokeObjectURL(url);
+
     carrierManager.stop();
     carrierManager = carrierManager.newInstance();
 
@@ -381,10 +402,10 @@ function App() {
       } else
         if (storRateCap > 67) {
           rate += " ⚠️⚠️ Strong visual alteration"
-        }else
-        if (storRateCap > 33) {
-          rate += " ⚠️ Visual alteration"
-        }
+        } else
+          if (storRateCap > 33) {
+            rate += " ⚠️ Visual alteration"
+          }
     }
     return rate;
   }
@@ -422,11 +443,11 @@ function App() {
             <EditableList listUpdate={cbListUpdate} list={listItems} onTryDecodeItem={tryDecodeItem} />
           </div>
           <div>
-            { (storTotalCap > 0) && (
-            <div style={{ marginBottom: "10px" }}>
-              <span>{getStorLabel()}</span>
-              <ProgressBar value={storRateCap} showValue={false} color={getStorColor()}></ProgressBar>
-            </div>
+            {(storTotalCap > 0) && (
+              <div style={{ marginBottom: "10px" }}>
+                <span>{getStorLabel()}</span>
+                <ProgressBar value={storRateCap} showValue={false} color={getStorColor()}></ProgressBar>
+              </div>
             )}
           </div>
           <div className='card linePanel'>

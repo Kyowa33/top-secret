@@ -72,7 +72,7 @@ const EditableList = ({ listUpdate, list, onTryDecodeItem }) => {
 
   const handleUpload = (index, event) => {
     const item = items[index];
-    if (item.isText()) {
+    if ((item.isText()) && (item.hasDecodedData())) {
       const confirmOverride = window.confirm("Uploading a new file will delete the existing note. Continue?");
       if (!confirmOverride) return;
     }
@@ -111,8 +111,27 @@ const EditableList = ({ listUpdate, list, onTryDecodeItem }) => {
     }
   };
 
-  const handlePreview = (item) => {
+  const handlePreview = (item, index) => {
 
+    // if ((items.length > 1) && (index > 0)) {
+    //   let decoded0 = items[index-1].decodedData;
+    //   let decoded1 = items[index].decodedData;
+
+    //   if ((decoded0 === null) || (decoded1 === null)) {
+    //     alert("null data");
+    //     return;
+    //   }
+    //   if (decoded0.length !== decoded1.length) {
+    //     alert("len diff");
+    //     return;
+    //   }
+    //   for (let i = 0; i < decoded0.length; i++) {
+    //     if (decoded0[i] !== decoded1[i]) {
+    //       console.log("Diff @" + i + " : data0 = " + decoded0[i] + " ; data1 = " + decoded1[i]);
+    //     }
+    //   }
+    // }
+    
     if (item.decodedData !== null) {
       const blob = new Blob([item.decodedData], { type: item.contentType });
       const url = URL.createObjectURL(blob);
@@ -272,7 +291,7 @@ const EditableList = ({ listUpdate, list, onTryDecodeItem }) => {
               <button onClick={() => handleDownload(item)} title="Download" disabled={!item.hasDecodedData()}>
                 <FaDownload />
               </button>
-              <button onClick={() => handlePreview(item)} title="Preview" disabled={!item.isPreviewable()}>
+              <button onClick={() => handlePreview(item, index)} title="Preview" disabled={!item.isPreviewable()}>
                 <FaEye />
               </button>
 

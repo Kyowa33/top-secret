@@ -22,14 +22,14 @@ class ItemData {
     this.flagNew = true;
     this.flagDecoded = true;
     this.encodedData = null;
-    this.decodedData = null;
+    this.decodedData = new Uint8Array(0);
     this.contentType = "text/plain";
     this.pass = "";
   }
 
 
   public hasDecodedData(): boolean {
-    return (this.decodedData !== null);
+    return ((this.decodedData !== null) && (this.decodedData.length > 0));
   }
 
   public hasEncodedData(): boolean {

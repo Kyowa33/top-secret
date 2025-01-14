@@ -1,3 +1,4 @@
+import Binary from "../../util/Binary.ts";
 import { BlockBase, BlockType } from "./BlockBase.ts";
 import { DataContainerParseCode } from "./DataContainer.ts";
 
@@ -74,6 +75,9 @@ class BlockData extends BlockBase {
             return null;
         }
         let strlen = inBuf[ofs++];
+        if (strlen + ofs > inBuf.length) {
+            return null;
+        }
         out.value = new TextDecoder().decode(inBuf.slice(ofs, ofs + strlen));
         out.idx = ofs + strlen;
         return out;
@@ -111,7 +115,7 @@ class BlockData extends BlockBase {
     }
 
 
-    private createIV() : Uint8Array {
+    private createIV(): Uint8Array {
         return new Uint8Array(16);
     }
 
@@ -141,7 +145,7 @@ class BlockData extends BlockBase {
     };
 
 
-    public async tryDecode(pass:string) {
+    public async tryDecode(pass: string) {
         if (this.isDecoded()) {
             return;
         }
@@ -152,7 +156,7 @@ class BlockData extends BlockBase {
         try {
             decryptedBuf = await this.decryptData(this.blockDataRaw, key, iv);
         }
-        catch(error) {
+        catch (error) {
             // console.log("BlockData : Wrong pass : " + pass);
             return;
         }
@@ -192,14 +196,20 @@ class BlockData extends BlockBase {
 
             this.decodedData = inBuf.slice(idx);
 
+            let hash = Binary.computeSHA256(this.decodedData);
+            console.log("BlockData::decode : decodedData hash : " + Binary.arrayUint8ToHex(hash));
+
             this.decoded = true;
             this.encodedDataSync = true;
         }
 
     }
 
-    public async encode(pass:string) {
+    public async encode(pass: string) {
         if ((this.decoded) && (!this.encodedDataSync)) {
+
+            let hash = Binary.computeSHA256(this.decodedData.slice(1));
+            console.log("BlockData::encode : decodedData hash : " + Binary.arrayUint8ToHex(hash));
 
             let nameBin = new TextEncoder().encode(this.name);
             let contentTypeBin = new TextEncoder().encode(this.contentType);
@@ -232,6 +242,25 @@ class BlockData extends BlockBase {
             let key = await this.createAESKey(pass);
             let iv = this.createIV();
             this.blockDataRaw = new Uint8Array(await this.encryptData(outBuf, key, iv));
+
+            // Test encryption / decryption reversion
+            // let decryptedBuf;
+            // try {
+            //     decryptedBuf = await this.decryptData(this.blockDataRaw, key, iv);
+            // }
+            // catch (error) {
+            //     console.log("BlockData : En/decryption test failed");
+            // }
+
+            // if (decryptedBuf.byteLength !== outBuf.length) {
+            //     console.log("Len diff");
+            // }
+
+            // for (let i = 0; i < decryptedBuf.length; i++) {
+            //     if (decryptedBuf[i] !== outBuf[i]) {
+            //         console.log("buf diff");
+            //     }
+            // }
 
             this.encodedDataSync = true;
         }

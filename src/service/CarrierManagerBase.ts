@@ -6,7 +6,8 @@ import {Task} from "../util/Task.ts";
 enum CarrierManager_Error {
     END_NO_MORE_DATA = "END_NO_MORE_DATA",
     END_NO_SPACE = "END_NO_SPACE",
-    END_MISMATCH = "END_MISMATCH"
+    END_MISMATCH = "END_MISMATCH",
+    END_CORRUPTED = "END_CORRUPTED"
 }
 
 abstract class CarrierManagerBase extends Task {

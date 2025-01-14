@@ -4,6 +4,7 @@ import { Task, TaskState } from "../util/Task.ts";
 import { DataContainer, DataContainerParseCode } from "../model/data/DataContainer.ts";
 import TabUtils from "../util/TabUtils.ts";
 import UPNG from "upng";
+import Binary from "../util/Binary.ts";
 
 enum StatusEncoder {
     ENCODE_BLOCKS = 0,
@@ -50,7 +51,7 @@ class StateObject extends TaskState {
 
         this.pos = h1 + (h2 << 8) + (h3 << 16);
         this.pos %= this.bitsOnLayer;
-        this.bitMap = new Uint32Array(this.bitsOnLayer / 32); // 32-bits words for 1 layer
+        this.bitMap = new Uint32Array(Math.ceil(this.bitsOnLayer / 32)); // 32-bits words for 1 layer
         // console.log("### resetPos: " + this.pos + " ; hashIndex : " + this.hashIndex);
     }
 
@@ -58,7 +59,7 @@ class StateObject extends TaskState {
         this.hashIndex %= this.hash.length;
         this.pos += this.hash[this.hashIndex++];
         this.pos %= this.bitsOnLayer;
-        this.pos = TabUtils.getNextFreePos(this.bitMap, this.pos);
+        this.pos = TabUtils.getNextFreePos(this.bitMap, this.pos, this.bitsOnLayer);
 
         // console.log("incPos: " + this.pos + " ; hashIndex : " + this.hashIndex);
 
@@ -69,6 +70,7 @@ class StateObject extends TaskState {
                 return false;
             }
             this.resetPos();
+            this.pos = TabUtils.getNextFreePos(this.bitMap, this.pos, this.bitsOnLayer); // Mark position
         }
         return true;
     }
@@ -146,7 +148,12 @@ class CarrierManagerPNG extends CarrierManagerBase {
 
         reader.onload = () => {
             let img = UPNG.decode(reader.result);
-            this.imageData = { data: new Uint8ClampedArray(UPNG.toRGBA8(img)), width: img.width, height: img.height, colorSpace: 'srgb' };
+            let imgRGBA = UPNG.toRGBA8(img);
+
+            // let hash = Binary.computeSHA256(imgRGBA);
+            // console.log("runRead : hash = " + Binary.arrayUint8ToHex(hash));
+
+            this.imageData = { data: new Uint8ClampedArray(imgRGBA), width: img.width, height: img.height, colorSpace: 'srgb' };
             this.fileRead = true;
             this.stop();
             incObj.onSuccess();
@@ -186,6 +193,11 @@ class CarrierManagerPNG extends CarrierManagerBase {
                 incObj.curByte |= incObj.curByteBitW;
             }
 
+            // if (incObj.byteIndex === 194400) {
+            // if (incObj.pos === 122326) {
+            //     console.log("decode : incObj.bitCounter = " + incObj.bitCounter + " ; pos = " + incObj.pos + " ; bitW = " + incObj.curByteBitW + " ; bitLayer = " + incObj.bitLayer + " ; (incObj.curByte & incObj.curByteBitW) = " + (incObj.curByte & incObj.curByteBitW));
+            // }
+
             incObj.curByteBitW <<= 1;
             if (incObj.curByteBitW > 128) {
                 let parseRet = incObj.data.parseInc(incObj.curByte);
@@ -203,6 +215,12 @@ class CarrierManagerPNG extends CarrierManagerBase {
                 if ((parseRet === DataContainerParseCode.UNEXPECTED_DATA)) {
                     this.stop();
                     incObj.onError(CarrierManager_Error.END_MISMATCH);
+                    break;
+                }
+
+                if ((parseRet === DataContainerParseCode.HASH_MISMATCH)) {
+                    this.stop();
+                    incObj.onError(CarrierManager_Error.END_CORRUPTED);
                     break;
                 }
                 incObj.curByteBitW = 1;
@@ -245,6 +263,9 @@ class CarrierManagerPNG extends CarrierManagerBase {
         this.stop();
 
         try {
+            // let hash = Binary.computeSHA256(new Uint8Array(this.imageData.data));
+            // console.log("write : hash = " + Binary.arrayUint8ToHex(hash));
+
             let outBuf = UPNG.encode(this.imageData.data, this.imageData.width, this.imageData.height, 0);
             onSuccess(new Blob([outBuf]));
         }
@@ -275,39 +296,44 @@ class CarrierManagerPNG extends CarrierManagerBase {
             incObj.curByteBitW = 1;
             incObj.encodeStatus = StatusEncoder.ENCODE_IMAGE;
             return false; // Break the Task loop
-        } else 
-        if (incObj.encodeStatus === StatusEncoder.PRINTING_DATA_CONTAINER) {
-            return true; // Break the Task loop
-        } else 
-        if (incObj.encodeStatus === StatusEncoder.ENCODE_IMAGE) {
-            let runCount = 0;
+        } else
+            if (incObj.encodeStatus === StatusEncoder.PRINTING_DATA_CONTAINER) {
+                return true; // Break the Task loop
+            } else
+                if (incObj.encodeStatus === StatusEncoder.ENCODE_IMAGE) {
+                    let runCount = 0;
 
-            // Encode 1kB
-            while (runCount < 8 * 1024) {
-                incObj.bitCounter++;
-                runCount++;
+                    // Encode 1kB
+                    while (runCount < 8 * 1024) {
+                        incObj.bitCounter++;
+                        runCount++;
 
-                if (!incObj.incPos()) {
-                    this.stop();
-                    incObj.onError(CarrierManager_Error.END_NO_SPACE);
-                    break;
-                }
+                        if (!incObj.incPos()) {
+                            this.stop();
+                            incObj.onError(CarrierManager_Error.END_NO_SPACE);
+                            break;
+                        }
 
-                TabUtils.setBit(imgData, incObj.pos, incObj.bitLayer, (incObj.curByte & incObj.curByteBitW) !== 0);
+                        // if (incObj.byteIndex === 194400) {
+                        // if (incObj.pos === 122326) {
+                        //     console.log("encode : incObj.bitCounter = " + incObj.bitCounter + " ; pos = " + incObj.pos + " ; (incObj.curByte & incObj.curByteBitW) = " + (incObj.curByte & incObj.curByteBitW));
+                        // }
 
-                incObj.curByteBitW <<= 1;
-                if (incObj.curByteBitW > 128) {
-                    incObj.byteIndex++;
-                    if (incObj.byteIndex >= incObj.encodedOutBuffer.length) {
-                        this.stop();
-                        incObj.onSuccess();
-                        break;
+                        TabUtils.setBit(imgData, incObj.pos, incObj.bitLayer, (incObj.curByte & incObj.curByteBitW) !== 0);
+
+                        incObj.curByteBitW <<= 1;
+                        if (incObj.curByteBitW > 128) {
+                            incObj.byteIndex++;
+                            if (incObj.byteIndex >= incObj.encodedOutBuffer.length) {
+                                this.stop();
+                                incObj.onSuccess();
+                                break;
+                            }
+                            incObj.curByte = incObj.encodedOutBuffer[incObj.byteIndex];
+                            incObj.curByteBitW = 1;
+                        }
                     }
-                    incObj.curByte = incObj.encodedOutBuffer[incObj.byteIndex];
-                    incObj.curByteBitW = 1;
                 }
-            }
-        }
 
         incObj.onUpdate(incObj.byteIndex * 100 / incObj.encodedOutBuffer.length);
 
@@ -315,8 +341,8 @@ class CarrierManagerPNG extends CarrierManagerBase {
     }
 
 
-    public getLayersCapacity() : number[] {
-        let caps : number[] = [];
+    public getLayersCapacity(): number[] {
+        let caps: number[] = [];
 
         for (let bit = 0; bit < 8; bit++) {
             let exploitableBytes = Math.floor((this.imageData.width * this.imageData.height * 4) / 8); // 1 bit on each ARGB channel

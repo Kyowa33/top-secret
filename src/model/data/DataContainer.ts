@@ -3,6 +3,8 @@ import BlockData from "./BlockData.ts";
 import BlockHash from "./BlockHash.ts";
 import BlockStop from "./BlockStop.ts";
 import BlockFactoryInstance from "./BlockFactory.ts";
+import TabUtils from "../../util/TabUtils.ts";
+import Binary from "../../util/Binary.ts";
 
 
 const enum DataContainerParseCode {
@@ -22,12 +24,14 @@ class DataContainer {
     private curIdx = 0;
     private tabBlocks: BlockBase[] = [];
 
+    public dataRaw: number[] = [];
 
-    public getDataBlocks() : BlockData[] {
+
+    public getDataBlocks(): BlockData[] {
         return this.tabBlocks.filter((blk) => (blk.getBlockType() === BlockType.DATA)) as BlockData[];
     }
 
-    public addDataBlock(blk : BlockData) {
+    public addDataBlock(blk: BlockData) {
         this.tabBlocks = this.getDataBlocks();
         this.tabBlocks.push(blk);
     }
@@ -57,14 +61,25 @@ class DataContainer {
                 this.curBlock.endParse();
                 this.tabBlocks.push(this.curBlock);
 
-                if (this.curBlock.getBlockType() === BlockType.STOP) {
-                    retCode = DataContainerParseCode.OK_END;
-                } else {
-                    retCode = DataContainerParseCode.OK_CONTINUE;
-                }
+                if (this.curBlock?.getBlockType() === BlockType.HASH) {
+                    const blkHash = this.curBlock as BlockHash;
+                    if (!blkHash.check(new Uint8Array(this.dataRaw))) {
+                        retCode = DataContainerParseCode.HASH_MISMATCH;
+                    }
+                } else
+                    if (this.curBlock.getBlockType() === BlockType.STOP) {
+                        retCode = DataContainerParseCode.OK_END;
+                    } else {
+                        retCode = DataContainerParseCode.OK_CONTINUE;
+                    }
                 this.curBlock = undefined;
             }
         }
+
+        if (this.curBlock?.getBlockType() !== BlockType.HASH) {
+            this.dataRaw.push(nextChar);
+        }
+        
         return retCode;
     }
 
@@ -81,13 +96,13 @@ class DataContainer {
         this.tabBlocks.push(new BlockStop());
     }
 
-    private async printOutInternal() {
+    private async printOutInternal() : Promise<Uint8Array> {
 
-        let aBlks : Uint8Array[] = [];
-        
+        let aBlks: Uint8Array[] = [];
+
         aBlks.push(new Uint8Array(this.HEADER));
         let size = aBlks[0].length;
-        
+
         console.log("printOutInternal : this.tabBlocks.length = " + this.tabBlocks.length);
         for (const blk of this.tabBlocks) {
             let tmp = await blk.printOut();
@@ -106,7 +121,7 @@ class DataContainer {
         return aOut;
     }
 
-    public async printOut() {
+    public async printOut() : Promise<Uint8Array> {
         await this.finalizeTabBlocks();
         return await this.printOutInternal();
     }
