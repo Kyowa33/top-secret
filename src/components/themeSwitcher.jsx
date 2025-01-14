@@ -39,7 +39,7 @@ const ThemeSwitcher = () => {
                 className="flex border-1 w-2rem h-2rem p-0 align-center justify-center"
                 onClick={onThemeToggler}
             >
-                <i className={`dark:text-white pi ${theme === 'dark' ? 'pi-moon' : 'pi-sun'}`} />
+                <i className={`dark:text-white pi ${theme === 'dark' ? 'pi-sun' : 'pi-moon'}`} />
             </button>
         </div>
     );
