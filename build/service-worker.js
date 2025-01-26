@@ -1,22 +1,29 @@
-self.addEventListener('install', (event) => {
-    event.waitUntil(
-      caches.open('kyowa-cache').then((cache) => {
-        return cache.addAll([
-          '/',
-          '/index.html',
-          '/manifest.json',
-          '/static/js/bundle.js',
-          // Add other assets and routes to cache
-        ]);
-      })
-    );
-  });
+// public/service-worker.js
 
-  self.addEventListener('fetch', (event) => {
-    event.respondWith(
-      caches.match(event.request).then((response) => {
-        console.log("ask fetch " + event.request.url + " ; response " + (response !== undefined ? "exists" : "does not exist : fetch from network"));
-        return response || fetch(event.request);
-      })
-    );
-  });
+import { precacheAndRoute } from 'workbox-precaching';
+import { registerRoute } from 'workbox-routing';
+import { CacheFirst } from 'workbox-strategies';
+import { CacheableResponsePlugin } from 'workbox-cacheable-response';
+import { ExpirationPlugin } from 'workbox-expiration';
+
+// Précache les fichiers générés par Webpack
+precacheAndRoute(self.__WB_MANIFEST || []);
+
+// Cache pour les fichiers statiques (CSS, JS, images)
+registerRoute(
+  ({ request }) => request.destination === 'style' || 
+                   request.destination === 'script' || 
+                   request.destination === 'image',
+  new CacheFirst({
+    cacheName: 'static-resources',
+    plugins: [
+      new CacheableResponsePlugin({
+        statuses: [0, 200], // Cache les réponses valides
+      }),
+      new ExpirationPlugin({
+        maxEntries: 50, // Maximum d'éléments à conserver dans le cache
+        maxAgeSeconds: 30 * 24 * 60 * 60, // Expiration après 30 jours
+      }),
+    ],
+  })
+);

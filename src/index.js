@@ -8,7 +8,7 @@ import Tailwind from 'primereact/passthrough/tailwind';
 import ThemeSwitcher from './components/themeSwitcher';
 
 if ('serviceWorker' in navigator) {
-  navigator.serviceWorker.register('/sw.js');
+  navigator.serviceWorker.register('./sw.js');
 }
 
 const root = ReactDOM.createRoot(document.getElementById('root'));
