@@ -10,7 +10,8 @@
     {
       "src": "logo128.png",
       "type": "image/png",
-      "sizes": "128x128"
+      "sizes": "128x128",
+      "purpose": "maskable" 
     },
     {
       "src": "logo2_1024.png",
