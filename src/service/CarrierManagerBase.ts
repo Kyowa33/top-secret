@@ -19,7 +19,11 @@ abstract class CarrierManagerBase extends Task {
         return this.fileRead;
     }
 
-    public abstract accept(mimeType : String) : boolean;
+    public abstract getAcceptedMimeTypes() : string[];
+
+    public accept(mimeType: String): boolean {
+        return this.getAcceptedMimeTypes().filter((v) => mimeType === v).length > 0;
+    }
     
     public abstract read(file, onUpdate : CallableFunction, onSuccess : CallableFunction, onError : CallableFunction) : void;
     public abstract decode(creds : Credentials, onUpdate : CallableFunction, onSuccess : CallableFunction, onError : CallableFunction) : void;
@@ -28,7 +32,7 @@ abstract class CarrierManagerBase extends Task {
     public abstract write(onUpdate : CallableFunction, onSuccess : CallableFunction, onError : CallableFunction) : Uint8Array | null;
     
     /**
-     * Return a number[8] with de capacity (in bytes) on each bit layer
+     * Return a number[8] with the capacity (in bits) on each bit layer
      */
     public abstract getLayersCapacity() : number[];
 

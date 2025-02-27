@@ -4,7 +4,7 @@ import { Task, TaskState } from "../util/Task.ts";
 import { DataContainer, DataContainerParseCode } from "../model/data/DataContainer.ts";
 import TabUtils from "../util/TabUtils.ts";
 import UPNG from "upng";
-import Binary from "../util/Binary.ts";
+
 
 enum StatusEncoder {
     ENCODE_BLOCKS = 0,
@@ -86,7 +86,7 @@ class CarrierManagerPNG extends CarrierManagerBase {
         if (Task.LOG) console.log("inst " + this.taskInstanceNumber + " ; constructor");
     }
 
-    public newInstance(): CarrierManagerBase {
+    public newInstance() : CarrierManagerBase {
         if (Task.LOG) console.log("inst " + this.taskInstanceNumber + " ; newInstance");
         const newInst = new CarrierManagerPNG();
         newInst.file = this.file;
@@ -95,8 +95,9 @@ class CarrierManagerPNG extends CarrierManagerBase {
         return newInst;
     }
 
-    public accept(mimeType: String): boolean {
-        return mimeType === "image/png";
+    public getAcceptedMimeTypes() : string[]
+    {
+        return ["image/png"];
     }
 
     /**
@@ -345,8 +346,12 @@ class CarrierManagerPNG extends CarrierManagerBase {
         let caps: number[] = [];
 
         for (let bit = 0; bit < 8; bit++) {
-            let exploitableBytes = Math.floor((this.imageData.width * this.imageData.height * 4) / 8); // 1 bit on each ARGB channel
-            caps.push(exploitableBytes);
+            let exploitableBits = this.imageData.width * this.imageData.height * 4; // 1 bit on each ARGB channel
+            caps.push(exploitableBits);
+        }
+
+        for (let i=0; i < 8; i++) {
+            console.log("DCT exploitable capacity : Bit " + i + " -> " + caps[i] + " bits");
         }
 
         return caps;

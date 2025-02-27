@@ -1,19 +1,35 @@
 import {CarrierManagerBase} from './CarrierManagerBase.ts';
+import CarrierManagerJPG from './CarrierManagerJPG.ts';
 import CarrierManagerPNG from './CarrierManagerPNG.ts';
 
 class CarrierFactory {
 
 
-    private tabCarrierManager: Array<CarrierManagerBase> = [new CarrierManagerPNG()];
+    private tabCarrierManager: Array<CarrierManagerBase> = [new CarrierManagerPNG(), new CarrierManagerJPG()];
+    private allMimeTypes : string[];
 
     private static instance: CarrierFactory;
-
 
     constructor() {
         if (!CarrierFactory.instance) {
             CarrierFactory.instance = this;
+            this.allMimeTypes = this.concatAcceptedMimeTypes();
         }
         return CarrierFactory.instance;
+    }
+
+    public getAllMimeTypes() : string[] {
+        return this.allMimeTypes;
+    }
+
+    private concatAcceptedMimeTypes() : string[] {
+        let ret : string[] = [];
+
+        this.tabCarrierManager.forEach((element) => {
+            ret = ret.concat(element.getAcceptedMimeTypes());
+        });
+
+        return ret;
     }
 
     public getCarrierManager(file) : CarrierManagerBase | undefined {

@@ -1,13 +1,14 @@
 import React, { useState } from 'react';
 import { FaFileImage } from 'react-icons/fa';
 
+import CarrierFactoryInstance from '../service/CarrierFactory.ts';
+
+
 const ImagePanel = ({ callback }) => {
   const [previewUrl, setPreviewUrl] = useState('');
   const [lastFile, setLastFile] = useState(null);
-  //const imageMimeType = /image\/(png|jpg|jpeg)/i;
 
-  const imageMimeType = /image\/(png)/i;
-  const acceptMime = "image/png";
+  const mimeTypes = CarrierFactoryInstance.getAllMimeTypes().join(",");
 
   function callParent(file) {
     if ((file !== undefined) && (file instanceof File)) {
@@ -21,8 +22,8 @@ const ImagePanel = ({ callback }) => {
     const file = event.target.files[0];
     if (file) {
 
-      if (!file.type.match(imageMimeType)) {
-        alert("Image mime type is not valid");
+      if (CarrierFactoryInstance.getAllMimeTypes().filter((e) => file.type === e).length === 0) {
+        alert("Image mime type is not valid.");
         return;
       }
 
@@ -50,7 +51,7 @@ const ImagePanel = ({ callback }) => {
                 <input
                   type="file"
                   id="imageUpload"
-                  accept={acceptMime}
+                  accept={mimeTypes}
                   style={{ display: 'none' }}
                   onChange={handleImageChange}
                 />

@@ -1,19 +1,22 @@
 import React, { useState } from 'react';
-import PassPanel from './components/PassPanel.jsx';
+
+import 'primeicons/primeicons.css';
+import { ProgressBar } from 'primereact/progressbar';
+
 import './App.css';
+import Credentials from './model/Credentials.ts';
+import ItemData from './model/component/ItemData.ts';
+import { DataContainer } from './model/data/DataContainer.ts';
+import DataConv from './service/DataConv.ts';
+import { CarrierManagerBase } from './service/CarrierManagerBase.ts';
+import CarrierFactoryInstance from './service/CarrierFactory.ts';
+import PassPanel from './components/PassPanel.jsx';
 import ImagePanel from './components/ImagePanel.jsx';
 import EditableList from './components/EditableList.tsx';
-import CarrierFactoryInstance from './service/CarrierFactory.ts';
-import Credentials from './model/Credentials.ts';
-import 'primeicons/primeicons.css';
 
-import { ProgressBar } from 'primereact/progressbar';
-import { DataContainer } from './model/data/DataContainer.ts';
-import ItemData from './model/component/ItemData.ts';
-import { CarrierManagerBase } from './service/CarrierManagerBase.ts';
-import DataConv from './service/DataConv.ts';
+
 import UiUtils from './util/UiUtils.ts';
-import Binary from './util/Binary.ts';
+
 
 
 let carrierManager: CarrierManagerBase | undefined;
@@ -63,8 +66,11 @@ function App() {
             tmpItemCap += 1 + item.name.length;
             tmpItemCap += 1 + item.contentType.length;
             tmpItemCap += item.decodedData?.length || 0;
+            
+            // 16-bytes AES padding
             tmpItemCap += 15;
-            tmpItemCap &= 0xFFFFFFF0; // 16-bytes AES padding
+            tmpItemCap &= 0xFFFFFFF0;
+
             itemCap += tmpItemCap;
           }
         }
@@ -177,6 +183,8 @@ function App() {
       imgStorageCapacities = [];
     }
 
+    imgStorageTotal = Math.floor(imgStorageTotal/8); // Bits to Bytes
+
     setStorTotalCap(imgStorageTotal);
     computeStorRateCap(storUsedCap, imgStorageTotal);
   }
@@ -189,7 +197,7 @@ function App() {
   }
 
   const onReadError = (err) => {
-    msg("Image could not be read.");
+    msg("Image could not be read : " + err);
     console.log("onReadError : " + err);
     setProgressVisible(false);
   }

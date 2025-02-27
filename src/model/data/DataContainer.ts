@@ -3,8 +3,7 @@ import BlockData from "./BlockData.ts";
 import BlockHash from "./BlockHash.ts";
 import BlockStop from "./BlockStop.ts";
 import BlockFactoryInstance from "./BlockFactory.ts";
-import TabUtils from "../../util/TabUtils.ts";
-import Binary from "../../util/Binary.ts";
+
 
 
 const enum DataContainerParseCode {

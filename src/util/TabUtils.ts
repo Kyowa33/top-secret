@@ -2,6 +2,7 @@
 
 class TabUtils {
 
+
     public static isBitSet(arr: any, pos: number, bitW: number) : boolean {
        
         let val = arr[pos];
